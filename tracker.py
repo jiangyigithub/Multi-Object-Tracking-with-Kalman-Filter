@@ -34,6 +34,7 @@ class Tracker(object):
 	def update(self, detections):
 		if len(self.tracks) == 0:
 			for i in range(detections.shape[0]):
+				# 1. create tracker from dectector at initial
 				track = Tracks(detections[i], self.trackId)
 				self.trackId +=1
 				self.tracks.append(track)
@@ -61,6 +62,7 @@ class Tracker(object):
 				else:
 					self.tracks[i].skipped_frames +=1
 
+# delete track if measurement is not detected for long time
 		del_tracks = []
 		for i in range(len(self.tracks)):
 			if self.tracks[i].skipped_frames > self.max_frame_skipped :
@@ -70,14 +72,15 @@ class Tracker(object):
 			for i in range(len(del_tracks)):
 				del self.tracks[i]
 				del assignment[i]
-
+		
+        # create new track for new detection which is not assigned
 		for i in range(len(detections)):
 			if i not in assignment:
 				track = Tracks(detections[i], self.trackId)
 				self.trackId +=1
 				self.tracks.append(track)
 
-
+        # update track based on kalman update step
 		for i in range(len(assignment)):
 			if(assignment[i] != -1):
 				self.tracks[i].skipped_frames = 0
